@@ -26,30 +26,24 @@ jobs:
           python-version: "3.11"
 
       - name: Build Lambda package
-        working-directory: projects/02-notice-board
         run: python build-lambda-pkg.py
 
       - name: Deploy Lambda
         run: |
           aws lambda update-function-code \
           --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-          --zip-file fileb://projects/02-notice-board/backend/lambda.zip
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
+          --zip-file fileb://backend/lambda.zip
 
       - name: Install frontend dependencies
-        working-directory: projects/02-notice-board/frontend
+        working-directory: frontend
         run: npm install
 
       - name: Build frontend
-        working-directory: projects/02-notice-board/frontend
+        working-directory: frontend
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Upload frontend to S3
         run: |
-          aws s3 sync projects/01-task-tracker/frontend/dist/ s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync frontend/dist/ s3://${{ secrets.S3_BUCKET }} --delete
